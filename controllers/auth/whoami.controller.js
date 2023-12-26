@@ -12,16 +12,16 @@ exports.jwtDetails = async (req, res, next) => {
           userId: decodedJwt.id,
           userName: decodedJwt.userFullName,
           userEmail: decodedJwt.userEmail,
-          userContactNo: decodedJwt.userContactNo,
-        },
+          userContactNo: decodedJwt.userContactNo
+        }
       ];
     }
-    res
-      .status(200)
-      .json({ status: "00", responseMessage: "Successful", data: data });
+    res.status(200).json({ status: "00", message: "Successful", data: data });
   } catch (error) {
-    res
-      .status(500)
-      .json({ status: "99", responseMessage: "Unauthorized", data: [] });
+    res.status(500).json({
+      errorId: "99",
+      error: "Server Error",
+      message: "Server error when validating access token. Please try again."
+    });
   }
 };

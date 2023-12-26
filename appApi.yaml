@@ -113,10 +113,22 @@ paths:
             $ref: "#/components/schemas/RefreshTokenOut"             
         400:
           description: User error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut"           
         404:
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut"           
         500:
           description: Internal server error 
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut"           
   /who-am-i:
     get:    
       summary: Current user details
