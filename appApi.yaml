@@ -1,0 +1,274 @@
+openapi: 3.0.2
+info:
+  version: "1.0.0"
+  title: Recruitment Suite Web Application API
+  description: Web application API for Recruitment Suite
+  contact:
+    email: madhuraliyanage1977@gmail.com
+  license:
+    name: Apache 2.0
+    url: "http://apache.org/"
+
+#host: "localhost"
+
+basePath: /api/v1
+servers:
+  - url: http://localhost:4040/api/v1
+    description: http Development
+  - url: https://localhost:1460/api/v1
+    description: https Development
+
+
+paths:
+  /auth:
+    post: 
+      summary: User authentication
+      tags:
+        - authorization
+      description: User will be authenticated. Will be returning access and refresh tokens.
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthIn"
+      responses:
+        200:
+          description: Successful    
+          content:
+            application/json:              
+              schema:
+                $ref: "#/components/schemas/AuthOut"             
+        400:
+          description: User error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut"
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut"          
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut"          
+  /auth/refresh-token:
+    post: 
+      summary: Generate new tokens (access and refresh) when expired
+      tags:
+        - authorization
+      description: Generate new access token and refresh token using old refresh token, when access token expires
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenIn"
+      responses:
+        200:
+          description: Successful    
+          name: RefreshToken
+          schema:
+            $ref: "#/components/schemas/RefreshTokenOut"             
+        400:
+          description: User error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut" 
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut" 
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorOut" 
+  /log-out:
+    post: 
+      summary: Logout
+      tags:
+        - authorization
+      description: Black list refresh token details
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenIn"      
+      responses:
+        200:
+          description: Successful    
+          name: Logout
+          schema:
+            $ref: "#/components/schemas/RefreshTokenOut"             
+        400:
+          description: User error
+        404:
+          description: Not found
+        500:
+          description: Internal server error 
+  /who-am-i:
+    get:    
+      summary: Current user details
+      tags:
+        - who-am-i      
+      description: Current user details will be extracted from access token
+      produces:
+        - application/json
+      security:
+        - authentication: []        
+      responses:
+        200:
+          description: Successful    
+          name: Auth
+          schema:
+            $ref: "#/components/schemas/WhoAmIOut"             
+        400:
+          description: User error
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+
+components:
+  securitySchemes:
+    authentication:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    AuthIn:
+      required:
+        - userName
+        - password
+      type: object     
+      properties:
+        userName:
+          type: string
+          title: User name
+          required: true
+        password:
+          type: string
+          title: Password
+          required: true
+      example:
+        userName: "indu"
+        password: "your-password"
+    AuthOut:
+      type: object     
+      properties:
+        status:
+          type: string
+          description: Status of the response 00 successful, 99 failed
+        message:
+          type: string
+          description: response message
+        tokenStatus:
+          type: string
+          description: Status of the token
+        userID: 
+          type: string
+          description: Requested user ID
+        data:
+          type: array
+          items: 
+            properties:
+              accessToken:
+                type: string
+                description: JWT access token after validation the user
+              refreshToken:
+                type: string
+                description: JWT refresh token after validation the user
+              id:
+                type: int
+                description: The auto-generated id of the user
+              userName:
+                type: string
+                description: The user name
+              userEmail:
+                type: string
+                description: Email address
+              isUserActive:
+                type: boolean
+                description: User active
+    RefreshTokenIn:
+      type: object     
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh Token
+          required: true
+      example:
+        refreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1hZGh1cmEiLCJ1c2VyRnVsbE5hbWUiOiJNYWRodXJ"
+    RefreshTokenOut:
+      type: object     
+      properties:
+        status:
+          type: string
+          description: Status of the response 00 successful, 99 failed
+        message:
+          type: string
+          description: response message
+        data:
+          type: array
+          items: 
+            properties:
+              accessToken:
+                type: string
+                description: New JWT access token generated using old refresh token
+              refreshToken:
+                type: string
+                description: New JWT refresh token generated using old refresh token
+    WhoAmIOut:
+      type: object     
+      properties:
+        status:
+          type: string
+          description: Status of the response 00 successful, 99 failed
+        message:
+          type: string
+          description: response message
+        data:
+          type: array
+          items: 
+            properties:
+              userId:
+                type: string
+                description: JWT token after validation the user
+              id:
+                type: integer
+                description: User ID
+              userName:
+                type: string
+                description: User full name
+              userEmail:
+                type: string
+                description: user email address
+              userContactNo:
+                type: string
+                description: User contact number
+    ErrorOut:
+      type: object     
+      properties:
+        errorId:
+          type: string
+          description: Error ID 99 failed
+        error:
+          type: string
+          description: Error title
+        message:
+          type: string
+          description: Description
+
+

@@ -1,0 +1,3 @@
+/node_modules
+/logs
+/openssl_certificates/private-key.pem
